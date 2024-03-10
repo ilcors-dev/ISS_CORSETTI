@@ -18,6 +18,12 @@ public class Producer extends ActorBasic24 {
     @Override
     protected void elabMsg(IApplMessage msg) throws Exception {
         CommUtils.outblue(pfx + name + " | elabMsg " + msg + " " + Thread.currentThread().getName());
+
+        if (msg.msgContent().equals("ack(update)")) {
+            IApplMessage logMsg = CommUtils.buildDispatch(name, "update", msg.msgContent(), "obslogger");
+
+            forward(logMsg);
+        }
     }
 
     public void sendUpdate(String s) {

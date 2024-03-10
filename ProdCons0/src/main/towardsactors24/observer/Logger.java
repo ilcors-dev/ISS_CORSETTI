@@ -1,6 +1,7 @@
 package main.towardsactors24.observer;
 
 import java.io.FileWriter;
+import java.util.Date;
 
 import unibo.basicomm23.interfaces.IApplMessage;
 import unibo.basicomm23.utils.CommUtils;
@@ -25,12 +26,11 @@ public class Logger extends ActorBasic24 {
 
     @Override
     protected void elabMsg(IApplMessage msg) throws Exception {
-        System.out.println("MSGID: " + msg.msgId());
         if (!msg.msgId().equals("update")) {
             return;
         }
 
-        fileWriter.write(msg.toString() + "\n");
+        fileWriter.write(msg.msgSender() + ": " + msg.toString() + "\n");
         fileWriter.flush();
     }
 }

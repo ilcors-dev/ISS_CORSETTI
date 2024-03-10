@@ -32,6 +32,8 @@ dependencies {
 
         /* LOG4J ************************************************ */
         testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.7'
+        testImplementation('junit:junit:4')
+
 
         /* HTTP ************************************************* */
         implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'

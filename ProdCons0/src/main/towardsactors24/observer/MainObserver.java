@@ -20,7 +20,7 @@ public class MainObserver {
         new Observer("a", ctx1).updateResource("test");
 
         new Consumer("consumer", ctx1);
-        new Producer("prod1", ctx1).sendUpdate("update");
+        new Producer("producer", ctx1).sendUpdate("update");
 
         CommUtils.delay(1000);
         CommUtils.outblack("MainOneNodeWithActors24 TERMINATES thread=" + Thread.currentThread().getName());

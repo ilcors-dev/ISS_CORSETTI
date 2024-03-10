@@ -1,0 +1,2 @@
+consumer: msg(update,dispatch,consumer,obslogger,update,10)
+producer: msg(update,dispatch,producer,obslogger,ack(update),12)
