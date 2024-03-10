@@ -1,7 +1,6 @@
 package main.towardsactors24;
 
 import unibo.basicomm23.msg.ProtocolType;
-import unibo.basicomm23.utils.CommUtils;
 import unibo.naiveactors24.ActorContext24;
 
 public class MainAsActorsConsumerOnly {

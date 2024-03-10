@@ -1,2 +1,1 @@
-msg(distance,dispatch,tester,consumer,distance(20),4)
-msg(distance,dispatch,tester,consumer,distance(30),5)
+msg(distance,dispatch,prod1,consumer,10,2)
