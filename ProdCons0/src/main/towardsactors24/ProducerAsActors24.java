@@ -4,7 +4,6 @@ import unibo.basicomm23.interfaces.IApplMessage;
 import unibo.basicomm23.utils.CommUtils;
 import unibo.naiveactors24.ActorBasic24;
 import unibo.naiveactors24.ActorContext24;
- 
 
 /*
  * ===========================================================================
@@ -21,50 +20,52 @@ import unibo.naiveactors24.ActorContext24;
  *  nessun altro messaggio in input viene elaborato
  * ===========================================================================
  */
-public class ProducerAsActors24 extends ActorBasic24{
-	 protected String msgId        = "distance";
-	 protected String  msgReceiver = "consumer";
- 	 protected String pfx          = "        ";
-	
- 	 public ProducerAsActors24(String name, ActorContext24 ctx) {
+public class ProducerAsActors24 extends ActorBasic24 {
+	protected String msgId = "distance";
+	protected String msgReceiver = "consumer";
+	protected String pfx = "        ";
+
+	public ProducerAsActors24(String name, ActorContext24 ctx) {
 		super(name, ctx);
 		activateAndStart();
 	}
 
 	@Override
 	protected void elabMsg(IApplMessage msg) throws Exception {
-		CommUtils.outyellow( pfx  + name + " | elabMsg " + msg + " " + Thread.currentThread().getName() ); 
-		if( msg.isReply() ) elabReply(msg);
-		if( msg.msgId().equals("cmd")) doJob();
+		CommUtils.outyellow(pfx + name + " | elabMsg " + msg + " " + Thread.currentThread().getName());
+		if (msg.isReply())
+			elabReply(msg);
+		if (msg.msgId().equals("cmd"))
+			doJob();
 	}
-	
+
 	protected void elabReply(IApplMessage msg) throws Exception {
-		CommUtils.outblue( pfx  + name + " | elabReply " + msg + " " + Thread.currentThread().getName() );
+		CommUtils.outblue(pfx + name + " | elabReply " + msg + " " + Thread.currentThread().getName());
 	}
-	
+
 	protected void doJob() throws Exception {
- 		IApplMessage msg = CommUtils.buildDispatch( name, msgId, "10" , msgReceiver);
-		IApplMessage req = CommUtils.buildRequest(  name, msgId, "50" , msgReceiver);
+		IApplMessage msg = CommUtils.buildDispatch(name, msgId, "10", msgReceiver);
+		IApplMessage req = CommUtils.buildRequest(name, msgId, "50", msgReceiver);
 
-//INVIO RICHIESTA BLOCCANTE: 
- 		//non ammessa
-//INVIO RICHIESTA ASINCRONA		 
-		CommUtils.outblue( pfx  + name + " sendRequest asynch " + req);
-		request(req);   
-//INVIO DISPATCH	
-		CommUtils.outblue( pfx  + name + " | forward " + msg );
-		forward( msg );
-//ELABORAZIONE DELLA RISPOSTA ALLA RICHIESTA ASINCRONA 
-		//non ammessa: la risposta è elaborata da  elabMsg
-//TERMINAZIONE 			
-		//non ammessa: il producer dovrebbe terminare ricevendo un msg di top		
+		// INVIO RICHIESTA BLOCCANTE:
+		// non ammessa
+		// INVIO RICHIESTA ASINCRONA
+		CommUtils.outblue(pfx + name + " sendRequest asynch " + req);
+		request(req);
+		// INVIO DISPATCH
+		CommUtils.outblue(pfx + name + " | forward " + msg);
+		forward(msg);
+		// ELABORAZIONE DELLA RISPOSTA ALLA RICHIESTA ASINCRONA
+		// non ammessa: la risposta è elaborata da elabMsg
+		// TERMINAZIONE
+		// non ammessa: il producer dovrebbe terminare ricevendo un msg di top
 
-//		for( int i=0; i<5; i++) {
-//			CommUtils.outblue( pfx  + name + " DOING SOME LONG JOB ... "  + Thread.currentThread().getName()  );
-// 			CommUtils.delay(400);   
-//		}
-			
- 	}
- 
- 
- }
+		// for( int i=0; i<5; i++) {
+		// CommUtils.outblue( pfx + name + " DOING SOME LONG JOB ... " +
+		// Thread.currentThread().getName() );
+		// CommUtils.delay(400);
+		// }
+
+	}
+
+}
