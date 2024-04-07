@@ -1,0 +1,56 @@
+System pingpong24
+ 
+Dispatch ball : ball(N) "info exchanged by the players"
+
+Context ctxping  ip [host="localhost" port=8014]
+
+QActor ping context ctxping{
+	[# var N = 1; val TMAX = 1500L #]
+	State s0 initial{
+		delay 1000
+		println("$name sends $N") color blue
+		forward pong -m ball : ball($N)
+	}
+  
+	Goto receive
+	  
+	State receive {
+		// println("$name received") color blue
+	}
+	
+	Transition t0 
+		whenMsg ball -> reply
+	
+	State reply{
+		[# N = N + 1 #]
+		delay 500
+		println("$name sends $N  ") color blue
+		updateResource [# "ball($N)" #]
+		forward pong -m ball : ball($N)
+	}
+	
+	Goto receive
+}
+
+QActor pong context ctxping {
+	[# val TMAX = 1500L #]
+	State s0 initial{
+		println("$name STARTS") color green
+	}
+	
+	Transition t0 
+		whenMsg ball -> reply
+	
+	State reply{
+		onMsg(ball : ball(X)){
+			[# val N = payloadArg(0).toInt() #]
+			println("$name receives $N") color green
+			
+			delay 500
+			forward ping -m ball : ball($N)
+		}		
+	}
+	
+	Transition t0 
+		whenMsg ball     -> reply	
+}

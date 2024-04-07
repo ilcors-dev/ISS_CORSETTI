@@ -1,0 +1,3 @@
+{"actor":"ping", "msgType":"dispatch", "curstate":"receive", "nextstate":"reply", "msgId":"ball"}
+{"actor":"pong", "msgType":"dispatch", "curstate":"s0", "nextstate":"reply", "msgId":"ball"}
+{"actor":"pong", "msgType":"dispatch", "curstate":"reply", "nextstate":"reply", "msgId":"ball"}
