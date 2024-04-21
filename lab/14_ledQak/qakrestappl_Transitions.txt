@@ -1,0 +1,2 @@
+{"actor":"led", "msgType":"dispatch", "curstate":"s0", "nextstate":"handleOn", "msgId":"ledOn"}
+{"actor":"led", "msgType":"dispatch", "curstate":"handleOn", "nextstate":"handleOff", "msgId":"ledOff"}

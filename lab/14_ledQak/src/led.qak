@@ -1,0 +1,43 @@
+System ledusageqak
+
+Dispatch ledOn : ledOn(N) "led command ON"
+Dispatch ledOff : ledOff(N) "led command OFF"
+
+Context ctxled ip [host="localhost" port=8111]
+
+QActor ledusage context ctxled {
+	State s0 initial {
+		delay 5000
+		forward led -m ledOn : ledOn(1)
+		delay 1000
+		forward led -m ledOff : ledOff(0)
+	}
+}
+
+QActor led context ctxled {
+	State s0 initial {
+		
+	}
+	
+	Transition t0 
+		whenMsg ledOn -> handleOn
+		
+	State handleOn {
+		println("$name received ON") color green
+		
+		[#
+			Runtime.getRuntime().exec("python3 ledOn.py")	
+		#]
+	}
+	
+	Transition t1
+		whenMsg ledOff -> handleOff
+	
+	State handleOff {
+		println("$name received OFF") color red
+		
+		[#
+			Runtime.getRuntime().exec("python3 ledOff.py")	
+		#]
+	}
+}
