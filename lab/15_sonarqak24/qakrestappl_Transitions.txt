@@ -1,0 +1,3 @@
+{"actor":"sonardevice", "msgType":"dispatch", "curstate":"s0", "nextstate":"start", "msgId":"sonarstart"}
+{"actor":"sonardevice", "msgType":"dispatch", "curstate":"s0", "nextstate":"stop", "msgId":"sonarstop"}
+{"actor":"sonardevice", "msgType":"dispatch", "curstate":"stop", "nextstate":"stop", "msgId":"sonarstop"}

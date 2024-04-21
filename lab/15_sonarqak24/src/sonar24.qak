@@ -1,0 +1,126 @@
+System sonarqak24
+
+Dispatch sonarstart : sonarstart(X)
+Dispatch sonarstop  : sonarstop(X)
+Event sonardata : distance(D)
+Event obstacle  : obstacle(D)
+
+Context ctxsonarqak24 ip [host="localhost" port=8000]
+
+// file:///Users/ilcors-dev/src/unibo/issLab24/iss24Material/docs/builded/html/RaspApplCode24.html#progetto-sonarqak24
+QActor sonar24 context ctxsonarqak24 {
+	[# var D = 0; #]
+	State s0 initial {
+		delay 100
+		forward sonardevice -m sonarstart : sonarstart(1)
+		
+		// STOP TEST
+		// delay 5000		
+		// println("$name SENDING STOP")
+		// forward sonardevice -m sonarstop : sonarstop(0)
+		
+		subscribeTo distancefilter for obstacle
+	}
+	
+	Transition t0 whenEvent obstacle -> handleObstacle
+	
+	State handleObstacle {
+		 onMsg(obstacle : obstacle(D)) {
+		 	[#  D = payloadArg(0).toInt() #]
+ 			println("$name OBSTACLE DETECTED ($D)") color green
+    	}
+	}
+	
+	Transition t0 whenEvent obstacle -> handleObstacle
+}
+
+QActor distancefilter context ctxsonarqak24 {
+	[# var D = 0; #]
+	State s0 initial {
+		delay 100
+		
+		// here we should receive the data already cleaned from random sonar measurements
+		subscribeTo datacleaner for sonardata
+		
+		println("$name subscribed to datacleaner") color yellow
+	}
+	
+	Transition t0 whenEvent sonardata -> filter
+	
+	State filter {
+		onMsg(sonardata : distance(D)) {
+	      	[#  D = payloadArg(0).toInt() #]
+	      	
+	      	// filter out random data that could be generated from the sonar and propagate the event
+	      	if [# D > 0 && D <= 150 #] {
+	 			emitlocalstream  obstacle : obstacle($D)
+	     	}
+    	}
+	}
+	
+	Transition t0 whenEvent sonardata -> filter
+}
+
+QActor datacleaner context ctxsonarqak24 {
+	[# var D = 0; #]
+	State s0 initial {
+		delay 100
+		subscribeTo sonardevice for sonardata
+		
+		println("$name subscribed to sonardevice") color blue
+	}
+	
+	Transition t0 whenEvent sonardata -> filter
+	
+	State filter {
+		onMsg(sonardata : distance(D)) {
+	      	[#  D = payloadArg(0).toInt() #]
+	      	
+	      	// filter out random data that could be generated from the sonar and propagate the event
+	      	if [# D < 3000 #] {
+	 			emitlocalstream  sonardata : distance($D)
+	     	}
+    	}
+	}
+	
+	Transition t0 whenEvent sonardata -> filter
+}
+
+QActor sonardevice context ctxsonarqak24 {
+	[# var D: String? = "0"; var process: Process? = null; #]
+	State s0 initial {
+		
+	}
+		
+	Transition t0
+		whenMsg sonarstart -> start
+		whenMsg sonarstop -> stop
+	
+	State stop {
+		[#
+			process?.destroy();
+		#]
+		
+		println("SONAR STOPPED") color cyan
+	}
+	
+	
+	Transition t0
+		whenMsg sonarstop -> stop
+	
+	State start {		
+		[#
+			process = process ?: Runtime.getRuntime().exec("python3 /Users/ilcors-dev/src/unibo/ISS_CORSETTI/lab/15_sonarqak24/src/sonar_mock.py");
+			val reader = java.io.BufferedReader(java.io.InputStreamReader(process?.inputStream))
+			val D = reader.readLine();
+		#]
+		
+		// println("$D")
+		
+		emitlocalstream sonardata : distance($D)
+		
+		delay 500
+	}
+
+	Goto start
+}
