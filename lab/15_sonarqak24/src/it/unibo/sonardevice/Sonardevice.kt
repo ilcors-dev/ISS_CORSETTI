@@ -21,7 +21,7 @@ class Sonardevice ( name: String, scope: CoroutineScope, isconfined: Boolean=fal
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		//val interruptedStateTransitions = mutableListOf<Transition>()
-		 var D: String? = "0"; var process: Process? = null;  
+		 var D = 0; var process: Process? = null;  
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -30,8 +30,8 @@ class Sonardevice ( name: String, scope: CoroutineScope, isconfined: Boolean=fal
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t06",targetState="start",cond=whenDispatch("sonarstart"))
-					transition(edgeName="t07",targetState="stop",cond=whenDispatch("sonarstop"))
+					 transition(edgeName="t02",targetState="start",cond=whenDispatch("sonarstart"))
+					transition(edgeName="t03",targetState="stop",cond=whenDispatch("sonarstop"))
 				}	 
 				state("stop") { //this:State
 					action { //it:State
@@ -43,15 +43,28 @@ class Sonardevice ( name: String, scope: CoroutineScope, isconfined: Boolean=fal
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t08",targetState="stop",cond=whenDispatch("sonarstop"))
+					 transition(edgeName="t04",targetState="stop",cond=whenDispatch("sonarstop"))
 				}	 
 				state("start") { //this:State
 					action { //it:State
 						
-									process = process ?: Runtime.getRuntime().exec("python3 /Users/ilcors-dev/src/unibo/ISS_CORSETTI/lab/15_sonarqak24/src/sonar_mock.py");
+									// process = process ?: Runtime.getRuntime().exec("python3 /Users/ilcors-dev/src/unibo/ISS_CORSETTI/lab/15_sonarqak24/src/sonar_mock.py");
+									process = process ?: Runtime.getRuntime().exec("python3 sonar.py");
 									val reader = java.io.BufferedReader(java.io.InputStreamReader(process?.inputStream))
-									val D = reader.readLine();
-						emitLocalStreamEvent("sonardata", "distance($D)" ) 
+									val readvalue = reader.readLine();
+									
+									if (readvalue == null) {
+										D = 0;
+									} else {
+										try {
+											D = readvalue.toFloat().toInt();
+										} catch (e: Exception){
+											CommUtils.outred("$name readSonarDataERROR: $e "   )	
+										}
+									}
+						if(  D > 0  
+						 ){emitLocalStreamEvent("sonardata", "distance($D)" ) 
+						}
 						delay(500) 
 						//genTimer( actor, state )
 					}

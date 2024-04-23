@@ -25,7 +25,7 @@ class Sonar24 ( name: String, scope: CoroutineScope, isconfined: Boolean=false  
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						delay(100) 
+						delay(5000) 
 						forward("sonarstart", "sonarstart(1)" ,"sonardevice" ) 
 						subscribeToLocalActor("distancefilter") 
 						//genTimer( actor, state )

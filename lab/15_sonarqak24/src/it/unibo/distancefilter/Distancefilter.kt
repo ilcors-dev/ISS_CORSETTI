@@ -25,7 +25,6 @@ class Distancefilter ( name: String, scope: CoroutineScope, isconfined: Boolean=
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						delay(100) 
 						subscribeToLocalActor("datacleaner") 
 						CommUtils.outyellow("$name subscribed to datacleaner")
 						//genTimer( actor, state )
@@ -33,7 +32,7 @@ class Distancefilter ( name: String, scope: CoroutineScope, isconfined: Boolean=
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t02",targetState="filter",cond=whenEvent("sonardata"))
+					 transition(edgeName="t07",targetState="filter",cond=whenEvent("sonardata"))
 				}	 
 				state("filter") { //this:State
 					action { //it:State
@@ -49,7 +48,7 @@ class Distancefilter ( name: String, scope: CoroutineScope, isconfined: Boolean=
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t03",targetState="filter",cond=whenEvent("sonardata"))
+					 transition(edgeName="t08",targetState="filter",cond=whenEvent("sonardata"))
 				}	 
 			}
 		}

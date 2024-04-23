@@ -27,11 +27,11 @@ with Diagram('sonarqak24Arch', show=False, outformat='png', graph_attr=graphattr
 ### see https://renenyffenegger.ch/notes/tools/Graphviz/attributes/label/HTML-like/index
      with Cluster('ctxsonarqak24', graph_attr=nodeattr):
           sonar24=Custom('sonar24','./qakicons/symActorSmall.png')
-          distancefilter=Custom('distancefilter','./qakicons/symActorSmall.png')
-          datacleaner=Custom('datacleaner','./qakicons/symActorSmall.png')
           sonardevice=Custom('sonardevice','./qakicons/symActorSmall.png')
+          datacleaner=Custom('datacleaner','./qakicons/symActorSmall.png')
+          distancefilter=Custom('distancefilter','./qakicons/symActorSmall.png')
      distancefilter >> Edge( label='obstacle', **eventedgeattr, decorate='true', fontcolor='red') >> sonar24
-     datacleaner >> Edge( label='sonardata', **eventedgeattr, decorate='true', fontcolor='red') >> distancefilter
      sonardevice >> Edge( label='sonardata', **eventedgeattr, decorate='true', fontcolor='red') >> datacleaner
+     datacleaner >> Edge( label='sonardata', **eventedgeattr, decorate='true', fontcolor='red') >> distancefilter
      sonar24 >> Edge(color='blue', style='solid',  decorate='true', label='<sonarstart &nbsp; >',  fontcolor='blue') >> sonardevice
 diag

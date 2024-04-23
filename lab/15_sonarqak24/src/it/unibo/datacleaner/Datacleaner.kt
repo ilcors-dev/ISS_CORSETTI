@@ -25,7 +25,6 @@ class Datacleaner ( name: String, scope: CoroutineScope, isconfined: Boolean=fal
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						delay(100) 
 						subscribeToLocalActor("sonardevice") 
 						CommUtils.outblue("$name subscribed to sonardevice")
 						//genTimer( actor, state )
@@ -33,14 +32,14 @@ class Datacleaner ( name: String, scope: CoroutineScope, isconfined: Boolean=fal
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t04",targetState="filter",cond=whenEvent("sonardata"))
+					 transition(edgeName="t05",targetState="filter",cond=whenEvent("sonardata"))
 				}	 
 				state("filter") { //this:State
 					action { //it:State
 						if( checkMsgContent( Term.createTerm("distance(D)"), Term.createTerm("distance(D)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								  D = payloadArg(0).toInt()  
-								if(  D < 3000  
+								if(  D < 300  
 								 ){emitLocalStreamEvent("sonardata", "distance($D)" ) 
 								}
 						}
@@ -49,7 +48,7 @@ class Datacleaner ( name: String, scope: CoroutineScope, isconfined: Boolean=fal
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t05",targetState="filter",cond=whenEvent("sonardata"))
+					 transition(edgeName="t06",targetState="filter",cond=whenEvent("sonardata"))
 				}	 
 			}
 		}

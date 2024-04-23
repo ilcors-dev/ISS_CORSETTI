@@ -11,7 +11,7 @@ Context ctxsonarqak24 ip [host="localhost" port=8000]
 QActor sonar24 context ctxsonarqak24 {
 	[# var D = 0; #]
 	State s0 initial {
-		delay 100
+		delay 5000
 		forward sonardevice -m sonarstart : sonarstart(1)
 		
 		// STOP TEST
@@ -34,60 +34,8 @@ QActor sonar24 context ctxsonarqak24 {
 	Transition t0 whenEvent obstacle -> handleObstacle
 }
 
-QActor distancefilter context ctxsonarqak24 {
-	[# var D = 0; #]
-	State s0 initial {
-		delay 100
-		
-		// here we should receive the data already cleaned from random sonar measurements
-		subscribeTo datacleaner for sonardata
-		
-		println("$name subscribed to datacleaner") color yellow
-	}
-	
-	Transition t0 whenEvent sonardata -> filter
-	
-	State filter {
-		onMsg(sonardata : distance(D)) {
-	      	[#  D = payloadArg(0).toInt() #]
-	      	
-	      	// filter out random data that could be generated from the sonar and propagate the event
-	      	if [# D > 0 && D <= 150 #] {
-	 			emitlocalstream  obstacle : obstacle($D)
-	     	}
-    	}
-	}
-	
-	Transition t0 whenEvent sonardata -> filter
-}
-
-QActor datacleaner context ctxsonarqak24 {
-	[# var D = 0; #]
-	State s0 initial {
-		delay 100
-		subscribeTo sonardevice for sonardata
-		
-		println("$name subscribed to sonardevice") color blue
-	}
-	
-	Transition t0 whenEvent sonardata -> filter
-	
-	State filter {
-		onMsg(sonardata : distance(D)) {
-	      	[#  D = payloadArg(0).toInt() #]
-	      	
-	      	// filter out random data that could be generated from the sonar and propagate the event
-	      	if [# D < 3000 #] {
-	 			emitlocalstream  sonardata : distance($D)
-	     	}
-    	}
-	}
-	
-	Transition t0 whenEvent sonardata -> filter
-}
-
 QActor sonardevice context ctxsonarqak24 {
-	[# var D: String? = "0"; var process: Process? = null; #]
+	[# var D = 0; var process: Process? = null; #]
 	State s0 initial {
 		
 	}
@@ -110,17 +58,79 @@ QActor sonardevice context ctxsonarqak24 {
 	
 	State start {		
 		[#
-			process = process ?: Runtime.getRuntime().exec("python3 /Users/ilcors-dev/src/unibo/ISS_CORSETTI/lab/15_sonarqak24/src/sonar_mock.py");
+			// process = process ?: Runtime.getRuntime().exec("python3 /Users/ilcors-dev/src/unibo/ISS_CORSETTI/lab/15_sonarqak24/src/sonar_mock.py");
+			process = process ?: Runtime.getRuntime().exec("python3 sonar.py");
 			val reader = java.io.BufferedReader(java.io.InputStreamReader(process?.inputStream))
-			val D = reader.readLine();
+			val readvalue = reader.readLine();
+			
+			if (readvalue == null) {
+				D = 0;
+			} else {
+				try {
+					D = readvalue.toFloat().toInt();
+				} catch (e: Exception){
+					CommUtils.outred("$name readSonarDataERROR: $e "   )	
+				}
+			}
 		#]
 		
 		// println("$D")
-		
-		emitlocalstream sonardata : distance($D)
+		if [# D > 0 #] { 
+			emitlocalstream sonardata : distance($D)	
+		}
 		
 		delay 500
 	}
 
 	Goto start
+}
+
+QActor datacleaner context ctxsonarqak24 {
+	[# var D = 0; #]
+	State s0 initial {
+		subscribeTo sonardevice for sonardata
+		
+		println("$name subscribed to sonardevice") color blue
+	}
+	
+	Transition t0 whenEvent sonardata -> filter
+	
+	State filter {
+		onMsg(sonardata : distance(D)) {
+	      	[#  D = payloadArg(0).toInt() #]
+	      	
+	      	// filter out random data that could be generated from the sonar and propagate the event
+	      	if [# D < 300 #] {
+	 			emitlocalstream  sonardata : distance($D)
+	     	}
+    	}
+	}
+	
+	Transition t0 whenEvent sonardata -> filter
+}
+
+
+QActor distancefilter context ctxsonarqak24 {
+	[# var D = 0; #]
+	State s0 initial {
+		// here we should receive the data already cleaned from random sonar measurements
+		subscribeTo datacleaner for sonardata
+		
+		println("$name subscribed to datacleaner") color yellow
+	}
+	
+	Transition t0 whenEvent sonardata -> filter
+	
+	State filter {
+		onMsg(sonardata : distance(D)) {
+	      	[#  D = payloadArg(0).toInt() #]
+	      	
+	      	// filter out random data that could be generated from the sonar and propagate the event
+	      	if [# D > 0 && D <= 150 #] {
+	 			emitlocalstream  obstacle : obstacle($D)
+	     	}
+    	}
+	}
+	
+	Transition t0 whenEvent sonardata -> filter
 }
