@@ -26,10 +26,10 @@ with Diagram('bw24Arch', show=False, outformat='png', graph_attr=graphattr) as d
      sys = Custom('','./qakicons/system.png')
 ### see https://renenyffenegger.ch/notes/tools/Graphviz/attributes/label/HTML-like/index
      with Cluster('ctxbw24', graph_attr=nodeattr):
-          bw24mqtt=Custom('bw24mqtt','./qakicons/symActorWithobjSmall.png')
+          bw24nomqtt=Custom('bw24nomqtt','./qakicons/symActorWithobjSmall.png')
           bwobserver=Custom('bwobserver','./qakicons/symActorSmall.png')
-     sys >> Edge( label='sonardata', **evattr, decorate='true', fontcolor='darkgreen') >> bw24mqtt
-     sys >> Edge( label='wolf', **evattr, decorate='true', fontcolor='darkgreen') >> bw24mqtt
+     sys >> Edge( label='sonardata', **evattr, decorate='true', fontcolor='darkgreen') >> bw24nomqtt
+     sys >> Edge( label='wolf', **evattr, decorate='true', fontcolor='darkgreen') >> bw24nomqtt
      sys >> Edge( label='vrinfo', **evattr, decorate='true', fontcolor='darkgreen') >> bwobserver
      sys >> Edge( label='sonardata', **evattr, decorate='true', fontcolor='darkgreen') >> bwobserver
 diag
