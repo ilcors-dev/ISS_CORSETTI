@@ -1,0 +1,8 @@
+{"actor":"sonardevice", "msgType":"dispatch", "curstate":"s0", "nextstate":"start", "msgId":"sonarstart"}
+{"actor":"sonardevice", "msgType":"dispatch", "curstate":"s0", "nextstate":"stop", "msgId":"sonarstop"}
+{"actor":"sonardevice", "msgType":"dispatch", "curstate":"stop", "nextstate":"stop", "msgId":"sonarstop"}
+{"actor":"sonardevice", "msgType":"dispatch", "curstate":"readSonarData", "nextstate":"stop", "msgId":"sonarstop"}
+{"actor":"sonardevice", "msgType":"dispatch", "curstate":"readSonarData", "nextstate":"readSonarData", "msgId":"doread"}
+{"actor":"sonardevice", "msgType":"dispatch", "curstate":"readSonarData", "nextstate":"endOfRead", "msgId":"doread"}
+{"actor":"sonardevice", "msgType":"dispatch", "curstate":"endOfRead", "nextstate":"start", "msgId":"sonarstart"}
+{"actor":"sonardevice", "msgType":"dispatch", "curstate":"endOfRead", "nextstate":"stop", "msgId":"sonarstop"}

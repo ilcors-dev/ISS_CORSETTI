@@ -1,0 +1,49 @@
+<html>
+<section id="progetto-boundarywalk24">
+	<h2>Progetto boundarywalk24<a class="headerlink" href="#progetto-boundarywalk24"
+			title="Permalink to this heading">¶</a>
+	</h2>
+</section>
+<p>Le specifiche di progetto sono disponibili <a href="./BoudaryWalk24.html">qui</a></p>
+<h3>boundarywalk24: NOTE IMPLEMENTATIVE<a class="headerlink" href="#boundarywalk24-analisi-del-problema"
+		title="Permalink to this heading">¶</a></h3>
+<section id="boundarywalk24-note-implementative">
+	<h4>IMPLEMENTAZIONE SENZA MQTT</h4>
+	<p>Si è adattato il <a href="./../sonar/src/sonarnomqtt.qak">sonar (sonarnomqtt.qak)</a> sviluppato in precedenza
+		per stabilire una
+		connessione dal raspberry al contesto qak
+		<code>ctxbw24</code>
+	</p>
+	<p>Il sonar emette l'evento <code>wolf</code> quando rileva un ostacolo a meno di 150</p>
+	<p>L'attore in ascolto di questo evento (<code><a href="../bw24/src/bw24nomqtt.qak">bw24nomqtt.qak</a></code>) è in
+		ascolto dell'evento e causa uno stop del robot in WENV</p>
+	<h5>Problematiche riscontrate</h5>
+	<p>Per qualche motivo, il sonar sul raspberry non riesce a connettersi al contesto in remoto</p>
+	<p>Ciò impedisce al sistema di funzionare correttamente</p>
+</section>
+<section id="boundarywalk24-note-implementative">
+	<h4>IMPLEMENTAZIONE CON MQTT</h4>
+	<p>In questa implementazione, come per l'implementazione senza MQTT, si è adattato il <a
+			href="./../sonar/src/sonarmqtt.qak">sonar (sonarmqtt.qak)</a> sviluppato in precedenza
+		in modo che emetti l'evento <code>wolf</code> al broker mqtt sul topic <code>batman_bw24data</code>
+	</p>
+	<p>Lato <a href="../bw24/src/bw24mqtt.qak">bw24mqtt.qak</a>, l'evento <code>wolf</code> viene ricevuto dal broker
+		causando lo stop del virtualrobot nel WENV</p>
+
+	<p>Al contrario dell'implementazione senza MQTT, qui i due attori in esecuzione sul raspberry e sul
+		"server" non hanno necessità di stabilire una connessione tra di loro, ma si appoggiano su un servizio esterno
+		per
+		poter completare la specifica di progetto.</p>
+	<p>È chiaro che, delegando parte dell'infrastruttura ad un servizio esterno, si perde il controllo su una parte del
+		sistema che, in caso di downtime, ne risentirebbe.</p>
+
+	<img src="./trim_1.gif" alt="bw24mqtt">
+</section>
+<div style="background-color:rgba(86, 56, 253, 0.9); width:60%;text-align:left;color:white">
+	By Luca Corsetti email: luca.corsetti3@studio.unibo.it, matricola: 0001131095
+	<img src="https://avatars.githubusercontent.com/u/61411878?v=4" alt="mbot" width="15%" height="15%">
+	GIT repo: <a href="https://github.com/ilcors-dev/ISS_CORSETTI"
+		style="color: white;">https://github.com/ilcors-dev/ISS_CORSETTI</a>
+</div>
+
+</html>
