@@ -1,0 +1,128 @@
+System cleaner24
+/*  
+ * ========================================
+ *  cleaner24Norobot
+ * ========================================
+ */    
+ 
+Dispatch   stepdone   : stepdone(V) "automessaggio"
+Dispatch   stepfail   : stepfail(X) "automessaggio"
+
+Context ctxcleaner24  ip [host="localhost" port=8032]
+
+/* 
+ * ----------------------------------------------------------------
+ * Procede coprendo la stanza secondo la strategia per colonne
+ * Muove il VirtualRobot usando il POJO VrobotLLMoves24  
+ * ----------------------------------------------------------------
+ */
+
+QActor cleaner24 context ctxcleaner24 withobj vr using "VrobotLLMoves24.create(\"localhost\",myself)"{    
+	import "main.resources.robotvirtual.VrobotLLMoves24" 
+	import "main.resources.map.MovementTracker" 
+	
+[#
+	var GoingDown   = true 
+	var tracker = MovementTracker(0, 0);
+#]  
+
+	State activate initial {
+		//printCurrentMessage
+		[#  GoingDown = true #]
+ 	}
+	Goto coverColumn
+ 
+ 
+				   
+	State coverColumn{  		  
+   		//printCurrentMessage		
+   		delay 300 //give some time ...
+   		[# var RSTEP = vr.step(350) #]
+   		if [# RSTEP #]{  //stepColumnDone
+   			autodispatch stepdone : stepdone(1)
+   		}else{
+   			autodispatch stepfail : stepfail(1)
+   		}
+ 	}
+	Transition t0  whenMsg stepdone -> coverColumn
+ 	               whenMsg stepfail -> turn    
+ 
+	State turn{  		  
+   		//printCurrentMessage
+   		println("turn while GoingDown=$GoingDown")
+   		if[# GoingDown #] { 
+   			[# vr.backward(50)  #]	  //SYNCH TUNING : better stepAsynch !!
+   			[# vr.turnLeft()    #]	
+   		}else{ 
+    			[# vr.turnRight() #]
+   		}
+   		delay 300 //give time to turn
+   		[# var RSTEP = vr.step(350) #]  //passo laterale
+   		if [# RSTEP #]{autodispatch stepdone : stepdone(1)}
+   		else{autodispatch stepfail : stepfail(1)}
+	}	
+	Transition t0  whenMsg stepdone -> stepAfterTurn
+	               whenMsg stepfail -> lastColumn
+ 
+	State stepAfterTurn{
+    	println("stepAfterTurn while GoingDown=$GoingDown") color magenta
+
+  		if[# GoingDown #] { 
+            [# vr.turnLeft()   #]	             
+   		}else{ 
+   			[# vr.turnRight() #]	
+   		}
+   		delay 300 //give time to turn
+   		[#  GoingDown = ! GoingDown #]   	 
+   		[# var RSTEP = vr.step(350) #] //continua  
+   		if [# RSTEP #]{
+   			autodispatch stepdone : stepdone(1)
+    	}else{
+   			autodispatch stepfail : stepfail(1) 
+   		}
+	} 
+ 	Transition t0  whenMsg stepdone -> coverColumn //turnDone
+ 	               whenMsg stepfail -> lastColumn
+ 	
+	State lastColumn{   		  
+   		printCurrentMessage color magenta
+   		if[# GoingDown #] {   			 
+   			[# vr.turnLeft()    #]	
+   		}else{   			 
+   			[# vr.turnRight() #]
+   		}
+    	[# var RSTEP = vr.step(350) #] //continua in altra direzione 
+   		if [# RSTEP #]{
+   			autodispatch stepdone : stepdone(1)
+   		}else{
+   			autodispatch stepfail : stepfail(1) 
+   		}
+	} 
+ 	Transition t0  whenMsg stepdone -> coverLastColumn  
+ 	               whenMsg stepfail -> endofwork
+ 	               
+ 	State coverLastColumn{  		
+ 		println("coverLastColumn norobot") color yellow  //Just to distinguish from cleaner24]
+    	delay 200
+ 		[# var RSTEP = vr.step(350) #]
+    	if [# RSTEP #]{   					
+   			autodispatch stepdone : stepdone(1)
+   		}else{
+   			autodispatch stepfail : stepfail(1) 
+   		}
+ 	}
+ 	Transition t0  whenMsg stepdone -> coverLastColumn  
+ 	               whenMsg stepfail -> endofwork
+ 	 
+ 	State endofwork{
+ 		println("---------------------------") color blue
+ 		
+		[# tracker.saveRoomMap("mapcleaned") #]
+ 		
+ 		[# System.exit(0) #]
+ 	}
+    		
+	State fatalError{  		  
+   		printCurrentMessage color red
+	}	
+}

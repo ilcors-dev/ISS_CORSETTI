@@ -27,7 +27,4 @@ with Diagram('cleaner24Arch', show=False, outformat='png', graph_attr=graphattr)
 ### see https://renenyffenegger.ch/notes/tools/Graphviz/attributes/label/HTML-like/index
      with Cluster('ctxcleaner24', graph_attr=nodeattr):
           cleaner24=Custom('cleaner24','./qakicons/symActorWithobjSmall.png')
-          sentinel=Custom('sentinel','./qakicons/symActorSmall.png')
-     sys >> Edge( label='alarm', **evattr, decorate='true', fontcolor='darkgreen') >> sentinel
-     sentinel >> Edge( label='pause', **eventedgeattr, decorate='true', fontcolor='red') >> sys
 diag
