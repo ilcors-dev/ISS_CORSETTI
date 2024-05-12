@@ -1,0 +1,44 @@
+<html>
+<section id="mapSubmerged">
+    <h1>Portiamo l'aggiornamento della mappa ad un livello sottostante<a class="headerlink" href="#mapSubmerged"
+            title="Permalink to this heading">¶</a></h1>
+    <section id="notes">
+        <h2>Note implementative <a href="#notes" title="Permalink to this heading">¶</a></h2>
+        <ul>
+            <li>La registrazione delle "caselle" della griglia pulite dal robot è stata spostata in un supporto dedicato
+                chiamato <a
+                    href="https://github.com/ilcors-dev/ISS_CORSETTI/blob/main/lab/17_robotCleaner/src/main/resources/map/MovementTracker.java"><code>MovementTracker.java</code></a>
+            </li>
+            <li>Il supporto è un observer e reagisce in modo <b>reattivo</b> agli eventi di movimento del robot</li>
+            <li>Sfruttando gli eventi, è in grado di costruire la mappa delle posizioni pulite dal virtual robot</li>
+            <li>Espone poi i metodi utili al livello superiore come:
+                <ul>
+                    <li><a
+                            href="https://github.com/ilcors-dev/ISS_CORSETTI/blob/eb5a3b3f94814a4ab048036b157176709623c238/lab/17_robotCleaner/src/main/resources/map/MovementTracker.java#L62">saveRoomMap()</a>
+                    </li>
+                    <li><a
+                            href="https://github.com/ilcors-dev/ISS_CORSETTI/blob/eb5a3b3f94814a4ab048036b157176709623c238/lab/17_robotCleaner/src/main/resources/map/MovementTracker.java#L66">showMap()</a>
+                    </li>
+                    <li><a
+                            href="https://github.com/ilcors-dev/ISS_CORSETTI/blob/eb5a3b3f94814a4ab048036b157176709623c238/lab/17_robotCleaner/src/main/resources/map/MovementTracker.java#L70">getPos()</a>
+                    </li>
+                </ul>
+            </li>
+            <li>Il nuovo attore qak, senza la logica di aggiornamento della mappa manuale, si trova in <a
+                    href="https://github.com/ilcors-dev/ISS_CORSETTI/blob/main/lab/17_robotCleaner/src/cleaner24NorobotMapSubmerged.qak"><code>cleaner24NorobotMapSubmerged.qak</code></a>,
+            </li>
+            <li>La differenza tra il nuovo attore e quello vecchio <a
+                    href="https://github.com/ilcors-dev/ISS_CORSETTI/blob/main/lab/17_robotCleaner/src/cleaner24Norobot.qak"><code>cleaner24Norobot.qak</code></a>
+                è visualizzabile <a href="https://www.diffchecker.com/cBqndJkL/">qui</a>
+            </li>
+        </ul>
+    </section>
+    <br>
+    <div style="background-color:rgba(86, 56, 253, 0.9); width:60%;text-align:left;color:white">
+        By Luca Corsetti email: luca.corsetti3@studio.unibo.it, matricola: 0001131095
+        <img src="https://avatars.githubusercontent.com/u/61411878?v=4" alt="mbot" width="15%" height="15%">
+        GIT repo: <a href="https://github.com/ilcors-dev/ISS_CORSETTI/tree/main/lab/17_robotCleaner"
+            style="color: white;">https://github.com/ilcors-dev/ISS_CORSETTI</a>
+    </div>
+
+</html>

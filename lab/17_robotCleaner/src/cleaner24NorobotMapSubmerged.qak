@@ -1,7 +1,7 @@
 System cleaner24
 /*  
  * ========================================
- *  cleaner24Norobot
+ *  cleaner24NorobotMapSubmerged.qak
  * ========================================
  */    
  
@@ -14,6 +14,8 @@ Context ctxcleaner24  ip [host="localhost" port=8032]
  * ----------------------------------------------------------------
  * Procede coprendo la stanza secondo la strategia per colonne
  * Muove il VirtualRobot usando il POJO VrobotLLMoves24  
+ * 
+ * Questa implementazione sfrutta il supporto MovementTracker per aggiornare le posizioni della stanza
  * ----------------------------------------------------------------
  */
 
