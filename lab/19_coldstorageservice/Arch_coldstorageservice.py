@@ -26,7 +26,7 @@ with Diagram('coldstorageserviceArch', show=False, outformat='png', graph_attr=g
      sys = Custom('','./qakicons/system.png')
 ### see https://renenyffenegger.ch/notes/tools/Graphviz/attributes/label/HTML-like/index
      with Cluster('ctxcoldstorage', graph_attr=nodeattr):
-          coldstorageservice=Custom('coldstorageservice','./qakicons/symActorWithobjSmall.png')
+          coldstorageservice=Custom('coldstorageservice','./qakicons/symActorSmall.png')
           drivermock=Custom('drivermock','./qakicons/symActorSmall.png')
-     drivermock >> Edge(color='magenta', style='solid', decorate='true', label='<store<font color="darkgreen"> reply reject</font> &nbsp; unload<font color="darkgreen"> unloadFailed unloadOk</font> &nbsp; >',  fontcolor='magenta') >> coldstorageservice
+     drivermock >> Edge(color='magenta', style='solid', decorate='true', label='<store<font color="darkgreen"> reply reject</font> &nbsp; >',  fontcolor='magenta') >> coldstorageservice
 diag

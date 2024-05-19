@@ -21,83 +21,32 @@ class Drivermock ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		//val interruptedStateTransitions = mutableListOf<Transition>()
-		 var T: String = "";  
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						delay(500) 
-						CommUtils.outmagenta("$name starts")
+						delay(200) 
+						CommUtils.outblack("$name starts")
 						request("store", "store(10)" ,"coldstorageservice" )  
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t04",targetState="handleReply",cond=whenReply("reply"))
-					transition(edgeName="t05",targetState="handleReject",cond=whenReply("reject"))
+					 transition(edgeName="t02",targetState="handleReply",cond=whenReply("reply"))
+					transition(edgeName="t03",targetState="handleReject",cond=whenReply("reject"))
 				}	 
 				state("handleReply") { //this:State
 					action { //it:State
-						if( checkMsgContent( Term.createTerm("reply(T)"), Term.createTerm("reply(T)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								 T = payloadArg(0);  
-								CommUtils.outmagenta("ACCEPTED $T")
-						}
-						delay(1000) 
+						CommUtils.outblack("ACCEPTED")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition( edgeName="goto",targetState="unload", cond=doswitch() )
 				}	 
 				state("handleReject") { //this:State
 					action { //it:State
-						if( checkMsgContent( Term.createTerm("reject(M)"), Term.createTerm("reject(Quantity)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								 val available = payloadArg(0).toInt()  
-								CommUtils.outmagenta("Not enough room to store food in the coldStorage, available space: $available")
-								 System.exit(1)  
-						}
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition(edgeName="t06",targetState="handleReply",cond=whenReply("reply"))
-				}	 
-				state("unload") { //this:State
-					action { //it:State
-						request("unload", "unload($T)" ,"coldstorageservice" )  
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-					 transition(edgeName="t07",targetState="handleUnloadOk",cond=whenReply("unloadOk"))
-					transition(edgeName="t08",targetState="handleUnloadFailed",cond=whenReply("unloadFailed"))
-				}	 
-				state("handleUnloadOk") { //this:State
-					action { //it:State
-						if( checkMsgContent( Term.createTerm("unloadOk(OK)"), Term.createTerm("unloadOk(OK)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								CommUtils.outmagenta("BYE BYE")
-								 System.exit(0)  
-						}
-						//genTimer( actor, state )
-					}
-					//After Lenzi Aug2002
-					sysaction { //it:State
-					}	 	 
-				}	 
-				state("handleUnloadFailed") { //this:State
-					action { //it:State
-						if( checkMsgContent( Term.createTerm("unloadFailed(Reason)"), Term.createTerm("unloadFailed(Reason)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								 val R = payloadArg(0)  
-								CommUtils.outmagenta("REFUSED, reason: $R")
-								 System.exit(2)  
-						}
+						CommUtils.outblack("REJECTED")
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002

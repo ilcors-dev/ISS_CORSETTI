@@ -1,0 +1,136 @@
+System flipflopsystem
+
+Request state : state(A, B) // N can be 0 or 1
+Reply output : output(O) for state
+
+Request norSET : norSET(A, B)
+Reply norSETReply : norSETReply(O) for norSET
+Request norRESET : norRESET(A, B)
+Reply norRESETReply : norRESETReply(O) for norRESET
+
+Context ctxflipflop ip [host="localhost" port=8000]
+
+QActor flipflop context ctxflipflop {
+	[# 
+		var Q = 0;
+		var NotQ = 1;
+		var SET = 0;
+		var RESET = 1;
+	#]
+	
+	State s0 initial {
+		println("$name STARTS")
+		println("$name Q: $Q")
+		println("$name Q': $NotQ")
+	}
+	
+	Transition t0
+		whenRequest state -> handleState
+		
+	State handleState {
+		onMsg(state : state(A, B)){
+			[# SET = payloadArg(0).toInt() #]
+			[# RESET = payloadArg(1).toInt() #]
+
+			println("RECEIVED SET=$SET RESET=$RESET ($SET $RESET)")
+			
+			request nor -m norSET : norSET($Q, $SET)
+		}
+	}
+	
+		
+	Transition t0
+		whenReply norSETReply -> handleNorSet
+		
+	State handleNorSet {
+		onMsg(norSETReply : norSETReply(O)){
+			[# NotQ = payloadArg(0).toInt() #]
+			
+			println("$name Q': $NotQ")
+			
+			request nor -m norRESET : norRESET($RESET, $NotQ)
+		}
+	}
+	
+	Transition t0
+		whenReply norRESETReply -> handleNorReset
+	
+	State handleNorReset {
+		onMsg(norRESETReply : norRESETReply(O)){
+			[# Q = payloadArg(0).toInt() #]
+			
+			println("$name Q: $Q")
+		}
+	}
+		
+	Transition t0
+		whenRequest state -> handleState
+}
+
+QActor nor context ctxflipflop {
+	State s0 initial {
+		println("$name STARTS") color green
+	}
+	
+	Transition t0
+		whenRequest norSET -> handleState
+		whenRequest norRESET -> handleState
+		
+	State handleState {		
+		onMsg(norSET : norSET(A, B)){
+			[# val A = payloadArg(0).toInt() == 1 #]
+			[# val B = payloadArg(1).toInt() == 1 #]
+			[# val Output = !(A || B); #]
+			[# val O = if(Output) 1 else 0; #]
+			
+			//println("$name NORRESET: $A, $B, $O")
+			
+			replyTo norSET with norSETReply : norSETReply($O)
+		}
+		
+		onMsg(norRESET : norRESET(A, B)){
+			[# val A = payloadArg(0).toInt() == 1 #]
+			[# val B = payloadArg(1).toInt() == 1 #]
+			[# val Output = !(A || B); #]
+			[# val O = if(Output) 1 else 0; #]
+			
+			//println("$name NORRESET: $A, $B, $O")
+			
+			replyTo norRESET with norRESETReply : norRESETReply($O)
+		}
+	}
+	
+	Transition t0
+		whenRequest norSET -> handleState
+		whenRequest norRESET -> handleState		
+}
+
+QActor flipflopmock context ctxflipflop {
+	State s0 initial {
+		delay 1000
+		
+		println("$name STARTS") color magenta
+		
+		request flipflop -m state : state(0, 0)
+		
+		delay 1000
+		
+		request flipflop -m state : state(1, 0)
+		
+		delay 1000
+		
+		request flipflop -m state : state(0, 1)
+
+		delay 1000
+		
+		request flipflop -m state : state(0, 0)
+				
+		delay 1000
+		
+		request flipflop -m state : state(1, 0)
+		
+		delay 1000
+		
+		request flipflop -m state : state(0, 1)
+	}
+}

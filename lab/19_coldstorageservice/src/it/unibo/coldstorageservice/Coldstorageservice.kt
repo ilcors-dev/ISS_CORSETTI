@@ -13,9 +13,6 @@ import kotlinx.coroutines.runBlocking
 import it.unibo.kactor.sysUtil.createActor   //Sept2023
 
 //User imports JAN2024
-import main.resources.robotvirtual.VrobotLLMoves24
-import java.time.Instant
-import kotlin.random.Random
 
 class Coldstorageservice ( name: String, scope: CoroutineScope, isconfined: Boolean=false  ) : ActorBasicFsm( name, scope, confined=isconfined ){
 
@@ -24,12 +21,7 @@ class Coldstorageservice ( name: String, scope: CoroutineScope, isconfined: Bool
 	}
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		//val interruptedStateTransitions = mutableListOf<Transition>()
-		 val vr = VrobotLLMoves24.create("localhost",myself)
-		 
-				var Capacity = 100;
-				val ticketsDuration = HashMap<String, Long>(); // holds the ticketid and the validity UNTIL timestamp
-				val ticketsQuantity = HashMap<String, Int>(); // holds the ticketid and the corresponding quantity associated to unload
-				val DEFAULT_TICKETTIME = 100 * 1000L; // 100s in ms
+		 var capacity = 100;  
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -40,7 +32,7 @@ class Coldstorageservice ( name: String, scope: CoroutineScope, isconfined: Bool
 					sysaction { //it:State
 					}	 	 
 					 transition(edgeName="t00",targetState="handleStore",cond=whenRequest("store"))
-					transition(edgeName="t01",targetState="handleUnload",cond=whenRequest("unload"))
+					transition(edgeName="t01",targetState="handleReply",cond=whenReply("reply"))
 				}	 
 				state("handleStore") { //this:State
 					action { //it:State
@@ -49,15 +41,12 @@ class Coldstorageservice ( name: String, scope: CoroutineScope, isconfined: Bool
 						if( checkMsgContent( Term.createTerm("store(Quantity)"), Term.createTerm("store(Quantity)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 val Q = payloadArg(0).toInt()  
-								 val A = Capacity - Q  
-								if(  (A < 0)  
-								 ){answer("store", "reject", "reject($Capacity)"   )  
+								if(  (capacity - Q < 0)  
+								 ){answer("store", "reject", "reject($Q)"   )  
 								}
 								else
-								 { val T = "ticket" + Random.nextInt(0, 10000);  
-								  ticketsDuration[T] = Instant.now().plusMillis(DEFAULT_TICKETTIME).epochSecond;  
-								  ticketsQuantity[T] = Q  
-								 answer("store", "reply", "reply($T)"   )  
+								 { capacity -= Q;  
+								 answer("store", "reply", "reply($Q)"   )  
 								 }
 						}
 						//genTimer( actor, state )
@@ -65,43 +54,14 @@ class Coldstorageservice ( name: String, scope: CoroutineScope, isconfined: Bool
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t12",targetState="handleUnload",cond=whenRequest("unload"))
 				}	 
-				state("handleUnload") { //this:State
+				state("handleReply") { //this:State
 					action { //it:State
-						if( checkMsgContent( Term.createTerm("unload(T)"), Term.createTerm("unload(T)"), 
-						                        currentMsg.msgContent()) ) { //set msgArgList
-								 val ticketId = payloadArg(0)  
-								 val ticketValidUntil = ticketsDuration[ticketId];  
-								 val now = Instant.now().epochSecond  
-								if(  ticketValidUntil == null  
-								 ){answer("unload", "unloadFailed", "unloadFailed(1)"   )  
-								}
-								else
-								 {if(  (now - ticketValidUntil) > 0  
-								  ){answer("unload", "unloadFailed", "unloadFailed(2)"   )  
-								 }
-								 }
-								 val quantity = ticketsQuantity[ticketId];  
-								if(  quantity == null  
-								 ){answer("unload", "unloadFailed", "unloadFailed(3)"   )  
-								}
-								else
-								 {if(  (Capacity - quantity) < 0  
-								  ){answer("unload", "unloadFailed", "unloadFailed(4)"   )  
-								 }
-								 else
-								  { Capacity -= quantity  
-								  answer("unload", "unloadOk", "unloadOk(1)"   )  
-								  }
-								 }
-						}
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t23",targetState="handleStore",cond=whenRequest("store"))
 				}	 
 			}
 		}

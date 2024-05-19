@@ -1,0 +1,41 @@
+System flipflopsystem
+
+Request state : state(A, B) // N can be 0 or 1
+Reply output : output(O) for state
+
+Context ctxflipflop ip [host="localhost" port=8000]
+
+QActor nor context ctxflipflop {
+	State s0 initial {
+		println("$name STARTS") color green
+	}
+	
+	Transition t0
+		whenRequest state -> handleState
+		
+	State handleState {
+		onMsg(state : state(A, B)){
+			[# val A = payloadArg(0).toInt() == 1 #]
+			[# val B = payloadArg(1).toInt() == 1 #]
+			[# val Output = !(A || B) #]
+			
+			println("$name: $A, $B, $Output")
+			
+			replyTo state with output : output($Output)
+		}
+	}
+	
+	Transition t0
+		whenRequest state -> handleState
+}
+
+QActor normock context ctxflipflop {
+	State s0 initial {
+		println("$name STARTS") color magenta
+		
+		request nor -m state : state(0, 0)
+		request nor -m state : state(0, 1)
+		request nor -m state : state(1, 0)
+		request nor -m state : state(1, 1)
+	}
+}
