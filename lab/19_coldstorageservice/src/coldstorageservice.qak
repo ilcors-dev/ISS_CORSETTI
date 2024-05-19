@@ -1,0 +1,170 @@
+System coldstorageservice
+
+Request store : store(Quantity)      			      // to request the ticket
+Request unload : unload(T)          			      // to unload the truck with quantity
+Reply reply : reply(T) for store    				  // reply to the store request when successful
+Reply reject : reject(M) for store  			      // reject store request
+Reply unloadFailed : unloadFailed(Reason) for unload  // why did the unloading fail?
+Reply unloadOk : unloadOk(OK) for unload 	      // unload OK, byebye
+
+Context ctxcoldstorage ip [host="localhost" port=8000]
+
+QActor coldstorageservice context ctxcoldstorage withobj vr using "VrobotLLMoves24.create(\"localhost\",myself)"{    
+	import "main.resources.robotvirtual.VrobotLLMoves24"
+	import "java.time.Instant"
+	import "kotlin.random.Random"
+
+	[# 
+		var Capacity = 100;
+		val ticketsDuration = HashMap<String, Long>(); // holds the ticketid and the validity UNTIL timestamp
+		val ticketsQuantity = HashMap<String, Int>(); // holds the ticketid and the corresponding quantity associated to unload
+		val DEFAULT_TICKETTIME = 100 * 1000L; // 100s in ms
+	#]
+	State s0 initial {
+		println("$name starts")
+	}
+	
+	Transition t0
+		whenRequest store -> handleStore
+		whenRequest unload -> handleUnload
+	
+	State handleStore {
+		printCurrentMessage color green
+		// check if the amount of stuff that needs to be unloaded would fit in the cold storage..
+		onMsg(store : store(Quantity)){
+		    [# val Q = payloadArg(0).toInt() #]
+		    [# val A = Capacity - Q #]
+		    
+		    // if not, reject the request of the driver and do not issue any tickets
+		    if [# (A < 0) #] {
+	    		replyTo store with reject : reject($Capacity)
+    		} else {
+			// if yes, create a 'unique' ticket (not so unique with random, but kinda), set it a validity deadline (100 seconds mocked)
+			// and reply to the driver with the unique ticket
+    			[# val T = "ticket" + Random.nextInt(0, 10000); #]
+    			[# ticketsDuration[T] = Instant.now().plusMillis(DEFAULT_TICKETTIME).epochSecond; #]
+    			[# ticketsQuantity[T] = Q #]
+		    	replyTo store with reply : reply($T)
+	    	}
+   	    }
+	}
+	
+	Transition t1
+		whenRequest unload -> handleUnload
+		
+	// handle unloading requests
+	State handleUnload {
+		onMsg(unload : unload(T)){
+		    [# val ticketId = payloadArg(0) #]
+		    [# val ticketValidUntil = ticketsDuration[ticketId]; #]		    
+		    [# val now = Instant.now().epochSecond #]
+		    
+		    // check if the ticket is present and if is valid
+		    if [# ticketValidUntil == null #]{
+		    	replyTo unload with unloadFailed : unloadFailed(1)
+		    }
+		    else {
+		    	// if not, reply to the driver
+		    	if [# (now - ticketValidUntil) > 0 #]
+		    	{
+		    		replyTo unload with unloadFailed : unloadFailed(2)
+		    	}
+		    }
+		    
+		    // proceed unloading
+		    [# val quantity = ticketsQuantity[ticketId]; #]
+		    
+		    // ticket not found? bye
+		    if [# quantity == null #] {
+		    	replyTo unload with unloadFailed : unloadFailed(3)
+		    } 
+		    else {
+		    	// if in the meantime some other loads were stored in the cold storage room and there is no space left for the
+			    // stuff to unload, return an error to the driver
+	    		if [# (Capacity - quantity) < 0 #]{
+	    			replyTo unload with unloadFailed : unloadFailed(4)	
+	    		} else {
+	    			// everything is okay, proceed storing and signal the driver OK
+					[# Capacity -= quantity #]
+					// here we should insert the logic to make the robot move to the coldstorage..
+					replyTo unload with unloadOk : unloadOk(1)
+				}
+			}
+   	    }
+	}
+	
+	Transition t2
+		whenRequest store -> handleStore
+}
+
+QActor drivermock context ctxcoldstorage {
+	[# var T: String = ""; #]
+	State s0 initial {
+		delay 500
+		println("$name starts") color magenta
+		
+		// ask the coldstorageservice to store some stuff..
+		request coldstorageservice -m store : store(10)
+	}
+	
+	Transition t0
+		whenReply reply -> handleReply
+		whenReply reject -> handleReject
+		
+	// if everything goes right, we store the ticket that was generated from the service and proceed unloading
+	State handleReply {
+		onMsg(reply : reply(T)){
+			[# T = payloadArg(0); #]
+			println("ACCEPTED $T") color magenta
+		}
+		
+		delay 1000
+	}
+	
+	// simulating the unloading when we have the ticket..
+	Goto unload
+	
+	// not enough room in the storageroom, BYE
+	State handleReject {
+		onMsg(reject : reject(Quantity)){
+			[# val available = payloadArg(0).toInt() #]
+			println("Not enough room to store food in the coldStorage, available space: $available") color magenta
+			
+			[# System.exit(1) #]			
+		}
+	}
+	
+	Transition t0
+		whenReply reply -> handleReply
+	
+	// send the unload request with the ticket id we received
+	State unload {
+		request coldstorageservice -m unload : unload($T)	
+	}
+	
+	Transition t0
+		whenReply unloadOk -> handleUnloadOk
+		whenReply unloadFailed -> handleUnloadFailed
+		
+	// if everything went ok, we can quit
+	State handleUnloadOk {
+		onMsg(unloadOk : unloadOk(OK)){
+			println("BYE BYE") color magenta
+		 	
+		 	[# System.exit(0) #]			
+		}
+	}
+	
+	// something went wrong while unloading:
+	// - ticket not found
+	// - not enought space in the cold room
+	// - ticket expired
+	State handleUnloadFailed {
+		onMsg(unloadFailed : unloadFailed(Reason)){
+			[# val R = payloadArg(0) #]
+			println("REFUSED, reason: $R") color magenta
+			
+			[# System.exit(2) #]			
+		}
+	}
+}

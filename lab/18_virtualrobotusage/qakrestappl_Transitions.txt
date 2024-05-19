@@ -1,0 +1,6 @@
+{"actor":"vrqak", "msgType":"dispatch", "curstate":"work", "nextstate":"dohalt", "msgId":"halt"}
+{"actor":"vrqak", "msgType":"dispatch", "curstate":"work", "nextstate":"domove", "msgId":"move"}
+{"actor":"vrqak", "msgType":"dispatch", "curstate":"handleSonarData", "nextstate":"handleVrinfoMsgReply", "msgId":"vrinfo"}
+{"actor":"vrqak", "msgType":"dispatch", "curstate":"domoverequest", "nextstate":"handleVrinfoMsgReply", "msgId":"vrinfo"}
+{"actor":"vrqak", "msgType":"dispatch", "curstate":"handleAsynchStep", "nextstate":"handleVrinfoMsgReply", "msgId":"vrinfo"}
+{"actor":"vrqak", "msgType":"dispatch", "curstate":"handleAsynchStep", "nextstate":"dohalt", "msgId":"halt"}

@@ -14,7 +14,9 @@ import it.unibo.kactor.sysUtil.createActor   //Sept2023
 
 //User imports JAN2024
 import main.resources.robotvirtual.VrobotLLMoves24
-import main.resources.map.MovementTracker
+import main.resources.map.RoomMap
+import main.resources.map.RobotDir
+import main.resources.map.RobotDir.Direction
 
 class Cleaner24 ( name: String, scope: CoroutineScope, isconfined: Boolean=false  ) : ActorBasicFsm( name, scope, confined=isconfined ){
 
@@ -26,11 +28,19 @@ class Cleaner24 ( name: String, scope: CoroutineScope, isconfined: Boolean=false
 		 val vr = VrobotLLMoves24.create("localhost",myself)
 		
 			var GoingDown   = true 
-			var tracker = MovementTracker(0, 0);
+		    lateinit var map : RoomMap
+			var PX = 0   //Robot pos along X
+			var PY = 0   //Robot pos along Y
 		return { //this:ActionBasciFsm
 				state("activate") { //this:State
 					action { //it:State
 						  GoingDown = true  
+						  RobotDir.setDir(Direction.DOWN)   
+						  map = RoomMap.loadRoomMap("map")  
+						  map.clear()     
+						  map.setCellClean(PX,PY)   
+						  map.setRobot(PX,PY)  
+						  map.showMap()   
 						//genTimer( actor, state )
 					}
 					//After Lenzi Aug2002
@@ -40,10 +50,13 @@ class Cleaner24 ( name: String, scope: CoroutineScope, isconfined: Boolean=false
 				}	 
 				state("coverColumn") { //this:State
 					action { //it:State
+						 map.setCellClean(PX,PY)   
 						delay(300) 
 						 var RSTEP = vr.step(350)  
 						if(  RSTEP  
-						 ){forward("stepdone", "stepdone(1)" ,name ) 
+						 ){ if(GoingDown) PX++; else PX--  
+						 map.setCellClean(PX,PY)   
+						forward("stepdone", "stepdone(1)" ,name ) 
 						}
 						else
 						 {forward("stepfail", "stepfail(1)" ,name ) 
@@ -85,6 +98,8 @@ class Cleaner24 ( name: String, scope: CoroutineScope, isconfined: Boolean=false
 				state("stepAfterTurn") { //this:State
 					action { //it:State
 						CommUtils.outmagenta("stepAfterTurn while GoingDown=$GoingDown")
+						  PY++; 
+						    		map.setCellClean(PX,PY)  
 						if(  GoingDown  
 						 ){ vr.turnLeft()    
 						}
@@ -92,10 +107,15 @@ class Cleaner24 ( name: String, scope: CoroutineScope, isconfined: Boolean=false
 						 { vr.turnRight()  
 						 }
 						delay(300) 
-						  GoingDown = ! GoingDown  
+						  GoingDown = ! GoingDown 
+						   			if( GoingDown ) RobotDir.setDir(Direction.DOWN) 
+						   			else RobotDir.setDir(Direction.UP) 
 						 var RSTEP = vr.step(350)  
 						if(  RSTEP  
-						 ){forward("stepdone", "stepdone(1)" ,name ) 
+						 ){ if(GoingDown) PX++; else PX--  
+						 map.setCellClean(PX,PY)   
+						 map.showMap()             
+						forward("stepdone", "stepdone(1)" ,name ) 
 						}
 						else
 						 {forward("stepfail", "stepfail(1)" ,name ) 
@@ -112,12 +132,19 @@ class Cleaner24 ( name: String, scope: CoroutineScope, isconfined: Boolean=false
 					action { //it:State
 						CommUtils.outmagenta("$name in ${currentState.stateName} | $currentMsg | ${Thread.currentThread().getName()} n=${Thread.activeCount()}")
 						 	   
+						 map.showMap()   
+						  PY++; 
+						    		map.setCellClean(PX,PY)  
 						if(  GoingDown  
 						 ){ vr.turnLeft()     
 						}
 						else
 						 { vr.turnRight()  
 						 }
+						 map.showMap()             
+						  GoingDown = ! GoingDown 
+						   			if( GoingDown ) RobotDir.setDir(Direction.DOWN) 
+						   			else RobotDir.setDir(Direction.UP) 
 						 var RSTEP = vr.step(350)  
 						if(  RSTEP  
 						 ){forward("stepdone", "stepdone(1)" ,name ) 
@@ -136,6 +163,8 @@ class Cleaner24 ( name: String, scope: CoroutineScope, isconfined: Boolean=false
 				state("coverLastColumn") { //this:State
 					action { //it:State
 						CommUtils.outyellow("coverLastColumn norobot")
+						 if(GoingDown) PX++; else PX--  
+						 map.setCellClean(PX,PY)   
 						delay(200) 
 						 var RSTEP = vr.step(350)  
 						if(  RSTEP  
@@ -155,7 +184,9 @@ class Cleaner24 ( name: String, scope: CoroutineScope, isconfined: Boolean=false
 				state("endofwork") { //this:State
 					action { //it:State
 						CommUtils.outblue("---------------------------")
-						 tracker.saveRoomMap("mapcleaned")  
+						 map.showMap()   
+						 val MS  = map.toString()   
+						 map.saveRoomMap("mapcleaned", MS )  
 						 System.exit(0)  
 						//genTimer( actor, state )
 					}
