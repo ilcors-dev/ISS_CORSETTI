@@ -26,10 +26,12 @@ with Diagram('bw24Arch', show=False, outformat='png', graph_attr=graphattr) as d
      sys = Custom('','./qakicons/system.png')
 ### see https://renenyffenegger.ch/notes/tools/Graphviz/attributes/label/HTML-like/index
      with Cluster('ctxbw24', graph_attr=nodeattr):
-          bw24nomqtt=Custom('bw24nomqtt','./qakicons/symActorWithobjSmall.png')
-          bwobserver=Custom('bwobserver','./qakicons/symActorSmall.png')
-     sys >> Edge( label='sonardata', **evattr, decorate='true', fontcolor='darkgreen') >> bw24nomqtt
-     sys >> Edge( label='wolf', **evattr, decorate='true', fontcolor='darkgreen') >> bw24nomqtt
-     sys >> Edge( label='vrinfo', **evattr, decorate='true', fontcolor='darkgreen') >> bwobserver
-     sys >> Edge( label='sonardata', **evattr, decorate='true', fontcolor='darkgreen') >> bwobserver
+          bw24core=Custom('bw24core','./qakicons/symActorWithobjSmall.png')
+          sonar24mock=Custom('sonar24mock','./qakicons/symActorSmall.png')
+          vrobserver=Custom('vrobserver','./qakicons/symActorSmall.png')
+     sys >> Edge( label='obstacle', **evattr, decorate='true', fontcolor='darkgreen') >> bw24core
+     sys >> Edge( label='sonardata', **evattr, decorate='true', fontcolor='darkgreen') >> vrobserver
+     sys >> Edge( label='obstacle', **evattr, decorate='true', fontcolor='darkgreen') >> vrobserver
+     sys >> Edge( label='vrinfo', **evattr, decorate='true', fontcolor='darkgreen') >> vrobserver
+     vrobserver >> Edge(color='blue', style='solid',  decorate='true', label='<pause &nbsp; >',  fontcolor='blue') >> bw24core
 diag

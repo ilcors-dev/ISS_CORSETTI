@@ -30,8 +30,8 @@ class Bwobserver ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t010",targetState="handleVrinfo",cond=whenEvent("vrinfo"))
-					transition(edgeName="t011",targetState="handleSonardata",cond=whenEvent("sonardata"))
+					 transition(edgeName="t09",targetState="handleVrinfo",cond=whenEvent("vrinfo"))
+					transition(edgeName="t010",targetState="handleSonardata",cond=whenEvent("sonardata"))
 				}	 
 				state("handleVrinfo") { //this:State
 					action { //it:State
@@ -42,8 +42,8 @@ class Bwobserver ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t012",targetState="handleVrinfo",cond=whenEvent("vrinfo"))
-					transition(edgeName="t013",targetState="handleSonardata",cond=whenEvent("sonardata"))
+					 transition(edgeName="t011",targetState="handleVrinfo",cond=whenEvent("vrinfo"))
+					transition(edgeName="t012",targetState="handleSonardata",cond=whenEvent("sonardata"))
 				}	 
 				state("handleSonardata") { //this:State
 					action { //it:State
@@ -54,8 +54,8 @@ class Bwobserver ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 					//After Lenzi Aug2002
 					sysaction { //it:State
 					}	 	 
-					 transition(edgeName="t014",targetState="handleVrinfo",cond=whenEvent("vrinfo"))
-					transition(edgeName="t015",targetState="handleSonardata",cond=whenEvent("sonardata"))
+					 transition(edgeName="t013",targetState="handleVrinfo",cond=whenEvent("vrinfo"))
+					transition(edgeName="t014",targetState="handleSonardata",cond=whenEvent("sonardata"))
 				}	 
 			}
 		}

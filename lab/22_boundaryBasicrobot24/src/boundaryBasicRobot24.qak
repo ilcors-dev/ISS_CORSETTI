@@ -1,0 +1,124 @@
+System boundarybasicrobot24
+
+Dispatch cmd       	: cmd(MOVE)        
+
+Request engage        : engage(CALLER, TIME)
+Reply   engagedone    : engagedone(ARG)    for engage
+Reply   engagerefused : engagerefused(ARG) for engage
+Event obstacle     : obstacle(X) 
+Event  sonardata   : sonar( DISTANCE ) 	  
+
+Request step       : step(TIME)
+Reply stepdone     : stepdone(V)                 for step
+Reply stepfailed   : stepfailed(DURATION, CAUSE) for step
+
+Dispatch setdirection : dir( D )  //D =up|down!left|right
+
+Context ctxboundarybasicrobot ip [host="localhost" port=8088]
+Context ctxbasicrobot ip [host="127.0.0.1" port=8020]
+
+ExternalQActor basicrobot context ctxbasicrobot
+
+QActor boundary context ctxboundarybasicrobot {
+	[# 
+		val OWNER = "$name";
+		var STEPSDONE = 0;
+		var SIDE = 0;
+	#]
+	State s0 initial {
+		println("$name starts")	color green
+		
+		request basicrobot -m engage : engage($OWNER, 350)
+	}
+	
+	Transition t0
+		whenReply engagedone -> handleEngageDone
+		whenReply engagerefused -> handleEngageRefused		
+	
+	State handleEngageRefused {
+		println("$name engage refused") color red
+	}
+	
+	Goto s0
+	
+	State handleEngageDone {
+		println("$name engage accepted") color green
+		
+		delay 100
+		
+		request basicrobot -m step : step(350)
+	}
+	
+	Transition t0
+		whenReply stepdone -> handleStepDone
+		whenEvent sonardata -> handleSonar
+		
+	State handleStepDone {
+		println("step ok") color green
+		
+		[# STEPSDONE += 1; #]
+		
+		delay 100
+		
+		request basicrobot -m step : step(350)
+	}
+		
+	Transition t0
+		whenReply stepdone -> handleStepDone
+		whenReply stepfailed -> handleObstacle
+		whenEvent sonardata -> handleSonar
+		
+	State handleObstacle {
+		println("obstacle!") color magenta
+		
+		if [# SIDE == 3 #]{
+			println("PERIMETRO: $STEPSDONE passi")
+			forward basicrobot -m setdirection : dir(down)
+			[# System.exit(0) #]	
+		}else {
+			[# SIDE += 1 #]
+		}
+		
+		delay 100
+		
+		if [# SIDE == 0 #] {
+			forward basicrobot -m setdirection : dir(down)
+		}
+		
+		if [# SIDE == 1 #] {
+			forward basicrobot -m setdirection : dir(right)
+		}
+		
+		if [# SIDE == 2 #] {
+			forward basicrobot -m setdirection : dir(up)
+		}
+		
+		if [# SIDE == 3 #] {
+			forward basicrobot -m setdirection : dir(left)
+		}
+		
+		delay 500
+		
+		request basicrobot -m step : step(350)
+	}
+				
+	Transition t0
+		whenReply stepdone -> handleStepDone
+		whenReply stepfailed -> handleObstacle
+		
+	State handleSonar {
+		println("SONARRRR") color red
+
+		delay 50
+		
+		forward basicrobot -m cmd : cmd(h)
+		
+		delay 500
+		
+		request basicrobot -m step : step(350)
+	}
+			
+	Transition t0
+		whenReply stepdone -> handleStepDone
+		whenReply stepfailed -> handleObstacle
+}

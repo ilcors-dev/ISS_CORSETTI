@@ -1,16 +1,17 @@
 %====================================================================================
 % bw24 description   
 %====================================================================================
-dispatch( stepdone, stepdone(X) ).
-dispatch( stepfailed, stepfailed(X) ).
-event( sonardata, sonar(DISTANCE) ).
+dispatch( cmd, cmd(MOVE) ). %MOVE = w|s|a|d|p   mosse del virtual robot
 event( vrinfo, vrinfo(A,B) ).
 dispatch( vrinfo, vrinfo(A,B) ).
-event( obstacle, obstacle(D) ). %emesso da WEnv
-event( wolf, wolf(D) ). %emesso dal raspberry
+event( sonardata, sonar(DISTANCE) ).
+event( obstacle, obstacle(X) ).
+dispatch( pause, pause(X) ).
 %====================================================================================
-context(ctxbw24, "192.168.0.200",  "TCP", "8120").
- qactor( bw24nomqtt, ctxbw24, "it.unibo.bw24nomqtt.Bw24nomqtt").
- static(bw24nomqtt).
-  qactor( bwobserver, ctxbw24, "it.unibo.bwobserver.Bwobserver").
- static(bwobserver).
+context(ctxbw24, "localhost",  "TCP", "8120").
+ qactor( bw24core, ctxbw24, "it.unibo.bw24core.Bw24core").
+ static(bw24core).
+  qactor( sonar24mock, ctxbw24, "it.unibo.sonar24mock.Sonar24mock").
+ static(sonar24mock).
+  qactor( vrobserver, ctxbw24, "it.unibo.vrobserver.Vrobserver").
+ static(vrobserver).
